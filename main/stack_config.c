@@ -34,7 +34,13 @@ const char *PTS_LE_CONN_UPDATED_DISABLED = "PTS_DisableConnUpdates";
 const char *PTS_DISABLE_SDP_LE_PAIR = "PTS_DisableSDPOnLEPair";
 const char *PTS_SMP_PAIRING_OPTIONS_KEY = "PTS_SmpOptions";
 const char *PTS_SMP_FAILURE_CASE_KEY = "PTS_SmpFailureCase";
+#ifdef BLUETOOTH_RTK
+const char *BTSNOOP_H5_ENABLE_LOG = "H5LogOutput";
+#endif
 
+#ifdef BLUETOOTH_RTK_COEX
+const char *BTSNOOP_COEX_ENABLE_LOG = "BtCoexLogOutput";
+#endif
 static config_t *config;
 
 // Module lifecycle functions
@@ -94,6 +100,17 @@ static bool get_btsnoop_should_save_last(void) {
 static bool get_trace_config_enabled(void) {
   return config_get_bool(config, CONFIG_DEFAULT_SECTION, TRACE_CONFIG_ENABLED_KEY, false);
 }
+#ifdef BLUETOOTH_RTK
+static int get_btsnoop_h5enable_log(void) {
+     return config_get_int(config, CONFIG_DEFAULT_SECTION, BTSNOOP_H5_ENABLE_LOG, 0);
+}
+#endif
+
+#ifdef BLUETOOTH_RTK_COEX
+static int get_btsnoop_coexenable_log(void) {
+     return config_get_int(config, CONFIG_DEFAULT_SECTION, BTSNOOP_COEX_ENABLE_LOG, 0);
+}
+#endif
 
 static bool get_pts_secure_only_mode(void) {
     return config_get_bool(config, CONFIG_DEFAULT_SECTION, PTS_SECURE_ONLY_MODE, false);
@@ -124,6 +141,10 @@ const stack_config_t interface = {
   get_btsnoop_turned_on,
   get_btsnoop_should_save_last,
   get_trace_config_enabled,
+#ifdef BLUETOOTH_RTK
+  get_btsnoop_h5enable_log,
+  get_btsnoop_coexenable_log,
+#endif
   get_pts_secure_only_mode,
   get_pts_conn_updates_disabled,
   get_pts_crosskey_sdp_disable,

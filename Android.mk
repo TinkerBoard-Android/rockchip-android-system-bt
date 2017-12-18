@@ -1,5 +1,9 @@
 LOCAL_PATH := $(call my-dir)
 
+ifeq ($(BOARD_HAVE_BLUETOOTH_RTK), true)
+bluetooth_CFLAGS += -DBLUETOOTH_RTK
+bluetooth_CFLAGS += -DBLUETOOTH_RTK_COEX
+endif
 # Setup Bluetooth local make variables for handling configuration
 ifneq ($(BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR),)
   bluetooth_C_INCLUDES := $(BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR)
@@ -8,6 +12,9 @@ else
   bluetooth_C_INCLUDES :=
   bluetooth_CFLAGS += -DHAS_NO_BDROID_BUILDCFG
 endif
+
+bluetooth_C_INCLUDES += $(LOCAL_PATH)
+bluetooth_CFLAGS += -DHAS_BDROID_BUILDCFG
 
 ifneq ($(BOARD_BLUETOOTH_BDROID_HCILP_INCLUDED),)
   bluetooth_CFLAGS += -DHCILP_INCLUDED=$(BOARD_BLUETOOTH_BDROID_HCILP_INCLUDED)

@@ -81,6 +81,9 @@ typedef struct hci_hal_t {
 const hci_hal_t *hci_hal_get_interface(void);
 
 const hci_hal_t *hci_hal_h4_get_interface(void);
+#ifdef BLUETOOTH_RTK
+const hci_hal_t *hci_hal_h5_get_interface(void);
+#endif
 const hci_hal_t *hci_hal_h4_get_test_interface(vendor_t *vendor_interface);
 
 const hci_hal_t *hci_hal_mct_get_interface(void);

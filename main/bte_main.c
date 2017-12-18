@@ -69,7 +69,11 @@
 #define BTE_BLE_STACK_CONF_FILE "/etc/bluetooth/ble_stack.conf"
 #endif  // defined(OS_GENERIC)
 #endif  // BT_BLE_STACK_CONF_FILE
-
+#ifdef BLUETOOTH_RTK
+#ifndef BTE_RTK_CONF_FILE
+#define BTE_RTK_CONF_FILE "/etc/bluetooth/rtkbt.conf"
+#endif
+#endif
 /******************************************************************************
 **  Variables
 ******************************************************************************/
@@ -88,6 +92,14 @@ static const hci_t *hci;
 *******************************************************************************/
 fixed_queue_t *btu_hci_msg_queue;
 
+#ifdef BLUETOOTH_RTK
+extern void bte_load_rtkbt_conf(const char *p_path);
+extern unsigned char h5_log_enable;
+static const stack_config_t *stack_config;
+#endif
+#ifdef BLUETOOTH_RTK_COEX
+extern unsigned char coex_log_enable;
+#endif
 /******************************************************************************
 **
 ** Function         bte_main_boot_entry
@@ -100,6 +112,10 @@ fixed_queue_t *btu_hci_msg_queue;
 void bte_main_boot_entry(void)
 {
     module_init(get_module(INTEROP_MODULE));
+
+#ifdef BLUETOOTH_RTK
+    bte_load_rtkbt_conf(BTE_RTK_CONF_FILE);
+#endif
 
     hci = hci_layer_get_interface();
     if (!hci)
@@ -115,6 +131,13 @@ void bte_main_boot_entry(void)
     hci->set_data_queue(btu_hci_msg_queue);
 
     module_init(get_module(STACK_CONFIG_MODULE));
+#ifdef BLUETOOTH_RTK
+    stack_config = stack_config_get_interface();
+    h5_log_enable = (uint8_t)stack_config->get_btsnoop_h5enable_log();
+#endif
+#ifdef BLUETOOTH_RTK_COEX
+    coex_log_enable = (uint8_t)stack_config->get_btsnoop_coexenable_log();
+#endif
 }
 
 /******************************************************************************

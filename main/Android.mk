@@ -99,6 +99,8 @@ LOCAL_REQUIRED_MODULES := \
     bt_did.conf \
     bt_stack.conf \
     libbt-hci \
+    libbt-vendor_uart \
+    libbt-vendor_usb \
     libbt-vendor
 
 LOCAL_CFLAGS += $(bluetooth_CFLAGS) -DBUILDCFG

@@ -34,6 +34,10 @@ typedef struct {
   bool (*get_btsnoop_turned_on)(void);
   bool (*get_btsnoop_should_save_last)(void);
   bool (*get_trace_config_enabled)(void);
+#ifdef BLUETOOTH_RTK
+  int (*get_btsnoop_h5enable_log)(void);
+  int (*get_btsnoop_coexenable_log)(void);
+#endif
   bool (*get_pts_secure_only_mode)(void);
   bool (*get_pts_conn_updates_disabled)(void);
   bool (*get_pts_crosskey_sdp_disable)(void);

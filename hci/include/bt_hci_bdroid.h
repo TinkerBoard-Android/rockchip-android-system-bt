@@ -111,6 +111,12 @@ typedef struct _hc_buffer_hdr
 **  Extern variables and functions
 ******************************************************************************/
 
+#ifdef BLUETOOTH_RTK
+extern uint8_t h5_log_enable;
+#endif
+#ifdef BLUETOOTH_RTK_COEX
+extern uint8_t coex_log_enable;
+#endif
 /******************************************************************************
 **  Functions
 ******************************************************************************/

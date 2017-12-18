@@ -43,6 +43,9 @@
 #include "osi/include/reactor.h"
 #include "packet_fragmenter.h"
 #include "vendor.h"
+#ifdef BLUETOOTH_RTK_COEX
+#include "rtk_parse.h"
+#endif
 
 // TODO(zachoverflow): remove this hack extern
 #include <hardware/bluetooth.h>
@@ -112,12 +115,19 @@ static hci_t interface;
 static const allocator_t *buffer_allocator;
 static const btsnoop_t *btsnoop;
 static const hci_hal_t *hal;
+#ifdef BLUETOOTH_RTK
+char bt_hci_device_node[BT_HCI_DEVICE_NODE_MAX_LEN] = {0};
+bool bluetooth_rtk_h5_flag = FALSE;
+#endif
 static const hci_hal_callbacks_t hal_callbacks;
 static const hci_inject_t *hci_inject;
 static const low_power_manager_t *low_power_manager;
 static const packet_fragmenter_t *packet_fragmenter;
 static const packet_fragmenter_callbacks_t packet_fragmenter_callbacks;
 static const vendor_t *vendor;
+#ifdef BLUETOOTH_RTK_COEX
+static const rtk_parse_manager_t *rtk_parse_manager;
+#endif
 
 static future_t *startup_future;
 static thread_t *thread; // We own this
@@ -246,6 +256,9 @@ static future_t *start_up(void) {
   vendor->open(btif_local_bd_addr.address, &interface);
   hal->init(&hal_callbacks, thread);
   low_power_manager->init(thread);
+#ifdef BLUETOOTH_RTK_COEX
+  rtk_parse_manager->rtk_parse_init(&interface);
+#endif
 
   vendor->set_callback(VENDOR_CONFIGURE_FIRMWARE, firmware_config_callback);
   vendor->set_callback(VENDOR_CONFIGURE_SCO, sco_config_callback);
@@ -295,6 +308,10 @@ static future_t *shut_down() {
 
     thread_join(thread);
   }
+
+#ifdef BLUETOOTH_RTK_COEX
+    rtk_parse_manager->rtk_parse_cleanup();
+#endif
 
   fixed_queue_free(command_queue, osi_free);
   command_queue = NULL;
@@ -505,6 +522,14 @@ static void event_packet_ready(fixed_queue_t *queue, UNUSED_ATTR void *context) 
 static void transmit_fragment(BT_HDR *packet, bool send_transmit_finished) {
   uint16_t event = packet->event & MSG_EVT_MASK;
   serial_data_type_t type = event_to_data_type(event);
+#ifdef BLUETOOTH_RTK_COEX
+  uint8_t *pp = ((uint8_t *)(packet + 1)) + packet->offset;
+  if (event == MSG_STACK_TO_HC_HCI_ACL)
+    rtk_parse_manager->rtk_parse_l2cap_data(pp,1);
+  if (event == MSG_STACK_TO_HC_HCI_CMD)
+    rtk_parse_manager->rtk_parse_command(pp);
+#endif
+
 
   btsnoop->capture(packet, false);
   hal->transmit_data(type, packet->data + packet->offset, packet->len);
@@ -662,8 +687,15 @@ static bool filter_incoming_event(BT_HDR *packet) {
   STREAM_TO_UINT8(event_code, stream);
   STREAM_SKIP_UINT8(stream); // Skip the parameter total length field
 
+#ifdef BLUETOOTH_RTK_COEX
+    rtk_parse_manager->rtk_parse_internal_event_intercept(packet->data);
+#endif
   if (event_code == HCI_COMMAND_COMPLETE_EVT) {
     STREAM_TO_UINT8(command_credits, stream);
+#ifdef BLUETOOTH_RTK
+    if(command_credits > 0)
+        command_credits = 1;
+#endif
     STREAM_TO_UINT16(opcode, stream);
 
     wait_entry = get_waiting_command(opcode);
@@ -684,6 +716,10 @@ static bool filter_incoming_event(BT_HDR *packet) {
     uint8_t status;
     STREAM_TO_UINT8(status, stream);
     STREAM_TO_UINT8(command_credits, stream);
+#ifdef BLUETOOTH_RTK
+    if(command_credits > 0)
+        command_credits = 1;
+#endif
     STREAM_TO_UINT16(opcode, stream);
 
     // If a command generates a command status event, it won't be getting a command complete event
@@ -724,6 +760,12 @@ static void dispatch_reassembled(BT_HDR *packet) {
   // Events should already have been dispatched before this point
   assert((packet->event & MSG_EVT_MASK) != MSG_HC_TO_STACK_HCI_EVT);
   assert(upwards_data_queue != NULL);
+#ifdef BLUETOOTH_RTK_COEX
+    if ((packet->event& MSG_EVT_MASK) == MSG_HC_TO_STACK_HCI_ACL) {
+      uint8_t *pp = ((uint8_t *)(packet + 1)) + packet->offset;
+      rtk_parse_manager->rtk_parse_l2cap_data(pp,0);
+    }
+#endif
 
   if (upwards_data_queue) {
     fixed_queue_enqueue(upwards_data_queue, packet);
@@ -835,6 +877,9 @@ const hci_t *hci_layer_get_interface() {
   vendor = vendor_get_interface();
   low_power_manager = low_power_manager_get_interface();
 
+#ifdef BLUETOOTH_RTK_COEX
+  rtk_parse_manager = rtk_parse_manager_get_interface();
+#endif
   init_layer_interface();
   return &interface;
 }

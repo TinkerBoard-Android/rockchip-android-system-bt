@@ -22,6 +22,21 @@ LOCAL_SRC_FILES := \
     src/vendor.c \
     ../EventLogTags.logtags
 
+ifeq ($(BOARD_HAVE_BLUETOOTH_RTK),true)
+LOCAL_CFLAGS += -DBLUETOOTH_RTK
+LOCAL_SRC_FILES += \
+    src/hci_hal_h5.c \
+    src/rtk_btsnoop_net.c \
+    src/bt_list.c \
+    src/bt_skbuff.c \
+    src/hci_h5.c
+endif
+
+ifeq ($(BOARD_HAVE_BLUETOOTH_RTK_COEX),true)
+LOCAL_SRC_FILES += \
+    src/rtk_parse.c
+endif
+
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/include \
     $(LOCAL_PATH)/.. \
@@ -38,6 +53,9 @@ ifeq ($(BLUETOOTH_HCI_USE_MCT),true)
 LOCAL_CFLAGS += -DHCI_USE_MCT
 endif
 LOCAL_CFLAGS += $(bluetooth_CFLAGS)
+ifeq ($(BOARD_HAVE_BLUETOOTH_RTK),true)
+LOCAL_CFLAGS += -Wno-unused-function -Wno-unused-variable
+endif
 LOCAL_CONLYFLAGS += $(bluetooth_CONLYFLAGS)
 LOCAL_CPPFLAGS += $(bluetooth_CPPFLAGS)
 

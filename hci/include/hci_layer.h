@@ -27,6 +27,9 @@
 #include "osi/include/osi.h"
 #include "bt_types.h"
 
+#ifdef BLUETOOTH_RTK
+#include "bt_hci_bdroid.h"
+#endif
 static const char HCI_MODULE[] = "hci_module";
 
 ///// LEGACY DEFINITIONS /////
@@ -72,6 +75,12 @@ typedef enum {
 
 typedef void (*command_complete_cb)(BT_HDR *response, void *context);
 typedef void (*command_status_cb)(uint8_t status, BT_HDR *command, void *context);
+
+#ifdef BLUETOOTH_RTK
+extern char bt_hci_device_node[BT_HCI_DEVICE_NODE_MAX_LEN];
+
+extern bool bluetooth_rtk_h5_flag ;//Default Usb H4 Interfcace ,if ture Uart H5 Interface
+#endif
 
 typedef struct hci_t {
   // Send a low power command, if supported and the low power manager is enabled.

@@ -78,6 +78,10 @@
 #include "oi_status.h"
 #endif
 
+#ifdef BLUETOOTH_RTK_COEX
+#include "rtk_parse.h"
+#endif
+
 #ifdef USE_AUDIO_TRACK
 #include "btif_avrcp_audio_track.h"
 #endif
@@ -155,7 +159,11 @@ enum {
 
 #ifndef BTIF_A2DP_DEFAULT_BITRATE
 /* High quality quality setting @ 44.1 khz */
+#ifdef BLUETOOTH_RTK
+#define BTIF_A2DP_DEFAULT_BITRATE 229
+#else
 #define BTIF_A2DP_DEFAULT_BITRATE 328
+#endif
 #endif
 
 #ifndef BTIF_A2DP_NON_EDR_MAX_RATE
