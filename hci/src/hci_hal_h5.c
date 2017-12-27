@@ -165,7 +165,7 @@ uint16_t h5_int_transmit_data_cb(serial_data_type_t type, uint8_t *data, uint16_
       assert(data != NULL);
       assert(length > 0);
 
-      LOG_DEBUG(LOG_TAG, "hci_hal_h5 %s data type: %d", __func__, type);
+      //LOG_DEBUG(LOG_TAG, "hci_hal_h5 %s data type: %d", __func__, type);
 
       if (type != DATA_TYPE_H5) {
         LOG_ERROR(LOG_TAG, "%s invalid data type: %d", __func__, type);
@@ -210,7 +210,7 @@ static uint16_t h5_transmit_data(serial_data_type_t type, uint8_t *data, uint16_
     uint16_t transmitted_length = 0;
     uint16_t opcode;
     uint8_t  *data_temp = data;
-    LOG_DEBUG(LOG_TAG, "hci_hal_h5 %s, data type: %d", __func__, type);
+    //LOG_DEBUG(LOG_TAG, "hci_hal_h5 %s, data type: %d", __func__, type);
 
     if (type < DATA_TYPE_COMMAND || type > DATA_TYPE_SCO) {
         LOG_ERROR(LOG_TAG, "%s invalid data type: %d", __func__, type);
