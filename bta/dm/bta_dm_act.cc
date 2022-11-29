@@ -3964,12 +3964,12 @@ static void bta_dm_gattc_callback(tBTA_GATTC_EVT event, tBTA_GATTC* p_data) {
  ******************************************************************************/
 static void bta_dm_ctrl_features_rd_cmpl_cback(tHCI_STATUS result) {
   APPL_TRACE_DEBUG("%s  status = %d ", __func__, result);
-  if (result == HCI_SUCCESS) {
+  //if (result == HCI_SUCCESS) {
     if (bta_dm_cb.p_sec_cback)
       bta_dm_cb.p_sec_cback(BTA_DM_LE_FEATURES_READ, NULL);
-  } else {
-    APPL_TRACE_ERROR("%s Ctrl BLE feature read failed: status :%d", __func__,
-                     result);
-  }
+  //} else {
+  //  APPL_TRACE_ERROR("%s Ctrl BLE feature read failed: status :%d", __func__,
+  //                   result);
+  //}
 }
 #endif /* BLE_VND_INCLUDED */

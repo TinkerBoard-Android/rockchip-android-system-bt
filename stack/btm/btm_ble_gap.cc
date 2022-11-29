@@ -537,6 +537,8 @@ static void btm_ble_vendor_capability_vsc_cmpl_cback(
 
   if (status != HCI_SUCCESS) {
     BTM_TRACE_DEBUG("%s: Status = 0x%02x (0 is success)", __func__, status);
+    if (p_ctrl_le_feature_rd_cmpl_cback != NULL)
+      p_ctrl_le_feature_rd_cmpl_cback(status);
     return;
   }
   CHECK(p_vcs_cplt_params->param_len >= BTM_VSC_CHIP_CAPABILITY_RSP_LEN);
